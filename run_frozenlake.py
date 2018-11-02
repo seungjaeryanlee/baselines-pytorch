@@ -18,6 +18,7 @@ NB_TRAINING_EPISODES = 2000
 NB_TEST_EPISODES = 100
 LEARNING_RATE = 0.1
 EPSILON = 0.1
+BATCH_SIZE = 16
 
 # For reproducibility
 SEED = 0xc0ffee
@@ -35,9 +36,9 @@ replay_buffer = PrioritizedReplayBuffer(capacity=100)
 agent = TabularBufferQAgent(env.observation_space,
                             env.action_space,
                             replay_buffer,
-                            lr=0.05,
-                            epsilon=0.1,
-                            batch_size=16)
+                            lr=LEARNING_RATE,
+                            epsilon=EPSILON,
+                            batch_size=BATCH_SIZE)
 
 # Train agent
 init_state_values = []

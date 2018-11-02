@@ -16,7 +16,7 @@ from replay import UniformReplayBuffer, PrioritizedReplayBuffer
 # Hyperparameters
 NB_TRAINING_EPISODES = 2000
 NB_TEST_EPISODES = 100
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.05
 EPSILON = 0.1
 
 # For reproducibility
@@ -35,8 +35,8 @@ replay_buffers = [
 agent = TabularEmsembleQAgent(env.observation_space,
                               env.action_space,
                               replay_buffers,
-                              lr=0.05,
-                              epsilon=0.1)
+                              lr=LEARNING_RATE,
+                              epsilon=EPSILON)
 
 # Train agent
 init_state_values = []
