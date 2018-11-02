@@ -6,9 +6,10 @@ import gym
 import matplotlib.pyplot as plt
 import numpy as np
 
-from envs import get_frozenlake
 from agents import *
 from common import get_running_mean, get_q_map
+from envs import get_frozenlake
+from replay import UniformReplayBuffer
 
 
 # Hyperparameters
@@ -23,8 +24,17 @@ np.random.seed(SEED)
 
 # Setup Agent & Environment
 env = get_frozenlake(seed=SEED)
-agent = TabularQLearningAgent(env.observation_space, env.action_space,
-                              lr=LEARNING_RATE, epsilon=EPSILON)
+# agent = TabularQLearningAgent(env.observation_space, env.action_space,
+#                               lr=LEARNING_RATE, epsilon=EPSILON)
+
+
+replay_buffer = UniformReplayBuffer(capacity=100)
+agent = TabularBufferQAgent(env.observation_space,
+                            env.action_space,
+                            replay_buffer,
+                            lr=0.05,
+                            epsilon=0.1,
+                            batch_size=16)
 
 # Train agent
 init_state_values = []
