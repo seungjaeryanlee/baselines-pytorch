@@ -14,9 +14,9 @@ from replay import UniformReplayBuffer, PrioritizedReplayBuffer
 
 
 # Hyperparameters
-NB_TRAINING_EPISODES = 2000
-NB_TEST_EPISODES = 100
+NB_TRAINING_EPISODES = 1500
 LEARNING_RATE = 0.1
+BUFFER_LEARNING_RATE = 0.05
 EPSILON = 0.1
 BATCH_SIZE = 16
 
@@ -25,66 +25,84 @@ SEED = 0xc0ffee
 random.seed(SEED)
 np.random.seed(SEED)
 
-# Setup Agent & Environment
+# Setup Environment
 env = get_frozenlake(seed=SEED)
-# agent = TabularQLearningAgent(env.observation_space, env.action_space,
-#                               lr=LEARNING_RATE, epsilon=EPSILON)
+
+# Setup Agents
+online_agent = TabularQLearningAgent(env.observation_space, env.action_space,
+                                lr=LEARNING_RATE, epsilon=EPSILON)
 
 
-# replay_buffer = UniformReplayBuffer(capacity=100)
-replay_buffer = PrioritizedReplayBuffer(capacity=100)
-agent = TabularBufferQAgent(env.observation_space,
+urb = UniformReplayBuffer(capacity=100)
+uniform_agent = TabularBufferQAgent(env.observation_space,
                             env.action_space,
-                            replay_buffer,
-                            lr=LEARNING_RATE,
+                            urb,
+                            lr=BUFFER_LEARNING_RATE,
                             epsilon=EPSILON,
                             batch_size=BATCH_SIZE)
 
-# Train agent
-init_state_values = []
-for i in range(NB_TRAINING_EPISODES):
-    obs = env.reset()
-    init_state_value = agent.get_state_value(obs)
-    init_state_values.append(init_state_value)
-    print('Initial state value for episode {:5d}: {}'.format(i + 1, init_state_value))
-    
-    done = False
+prb = PrioritizedReplayBuffer(capacity=100)
+prioritized_agent = TabularBufferQAgent(env.observation_space,
+                            env.action_space,
+                            prb,
+                            lr=BUFFER_LEARNING_RATE,
+                            epsilon=EPSILON,
+                            batch_size=BATCH_SIZE)
 
-    while not done:
-        action = agent.get_action(obs)
-        next_obs, rew, done, info = env.step(action)
-        agent.learn(obs, action, next_obs, rew, done)
-        obs = next_obs
+combined_replay_buffers = [
+    # replay_buffer, batch_size
+    (UniformReplayBuffer(capacity=1), 1),
+    (UniformReplayBuffer(capacity=100), 15),
+]
+combined_agent = TabularEmsembleQAgent(env.observation_space,
+                              env.action_space,
+                              combined_replay_buffers,
+                              lr=LEARNING_RATE,
+                              epsilon=EPSILON)
 
-# Plot Initial State Values
+ensemble_replay_buffers = [
+    # replay_buffer, batch_size
+    (PrioritizedReplayBuffer(capacity=10), 8),
+    (PrioritizedReplayBuffer(capacity=100), 8),
+]
+ensemble_agent = TabularEmsembleQAgent(env.observation_space,
+                              env.action_space,
+                              ensemble_replay_buffers,
+                              lr=LEARNING_RATE,
+                              epsilon=EPSILON)
+
+agents = [
+    (online_agent, 'Online'),
+    (uniform_agent, 'URB'),
+    (prioritized_agent, 'PRB'),
+    (combined_agent, 'CER'),
+    (ensemble_agent, 'Ensemble'),
+]
+
+for agent, label in agents:
+
+    # Train agent
+    init_state_values = []
+    for i in range(NB_TRAINING_EPISODES):
+        obs = env.reset()
+        init_state_value = agent.get_state_value(obs)
+        init_state_values.append(init_state_value)
+        if i % 100 == 99:
+            print('Initial state value for episode {:5d}: {}'.format(i + 1, init_state_value))
+        
+        done = False
+
+        while not done:
+            action = agent.get_action(obs)
+            next_obs, rew, done, info = env.step(action)
+            agent.learn(obs, action, next_obs, rew, done)
+            obs = next_obs
+
+    # Plot Initial State Values
+    plt.plot(init_state_values, label=label)
+
 plt.xlabel('Episode')
 plt.ylabel('$V(s_0)$')
-plt.plot(init_state_values)
-plt.savefig('results/images/run_frozenlake_with_online_q.png')
+plt.legend(loc='lower right')
+plt.savefig('results/images/run_frozenlake_{}.png'.format(SEED))
 plt.show()
-
-# Plot Smoothed Initial State Values
-plt.xlabel('Episode')
-plt.ylabel('$G$')
-plt.plot(get_running_mean(init_state_values))
-plt.savefig('results/images/run_frozenlake_with_online_q_smooth.png')
-plt.show()
-
-# Print Q-Map
-print(get_q_map(env, agent))
-
-# Test Agent
-epi_returns = []
-for i in range(NB_TEST_EPISODES):
-    obs = env.reset()
-
-    done = False
-    epi_return = 0
-    while not done:
-        action = agent.get_action(obs, epsilon=0)
-        obs, rew, done, info = env.step(action)
-        epi_return += rew
-
-    epi_returns.append(epi_return)
-
-print('Average Episodic Return of ', np.mean(epi_returns))
