@@ -22,3 +22,11 @@ def get_frozenlake(seed=None):
         env.seed(seed)
 
     return env
+
+def get_lunarlander(seed=None):
+    env = gym.make('LunarLander-v2')
+
+    if seed:
+        env.seed(seed)
+
+    return env

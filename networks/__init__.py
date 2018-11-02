@@ -1,1 +1,1 @@
-from .minigrid_net import MinigridNetwork
+from .lunarlander_net import LunarLanderNetwork
