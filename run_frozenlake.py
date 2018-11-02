@@ -5,11 +5,12 @@ Run a specified agent on FrozenLakeDeterministic8x8-v0.
 import gym
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 from agents import *
 from common import get_running_mean, get_q_map
 from envs import get_frozenlake
-from replay import UniformReplayBuffer
+from replay import UniformReplayBuffer, PrioritizedReplayBuffer
 
 
 # Hyperparameters
@@ -20,6 +21,7 @@ EPSILON = 0.1
 
 # For reproducibility
 SEED = 0xc0ffee
+random.seed(SEED)
 np.random.seed(SEED)
 
 # Setup Agent & Environment
@@ -28,7 +30,8 @@ env = get_frozenlake(seed=SEED)
 #                               lr=LEARNING_RATE, epsilon=EPSILON)
 
 
-replay_buffer = UniformReplayBuffer(capacity=100)
+# replay_buffer = UniformReplayBuffer(capacity=100)
+replay_buffer = PrioritizedReplayBuffer(capacity=100)
 agent = TabularBufferQAgent(env.observation_space,
                             env.action_space,
                             replay_buffer,
