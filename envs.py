@@ -2,6 +2,8 @@ from gym.envs.registration import register
 import gym
 import numpy as np
 
+import gym_minigrid
+
 
 def register_env():
     register(
@@ -20,3 +22,28 @@ def get_frozenlake(seed=None):
         env.seed(seed)
 
     return env
+
+class MinigridWrapper(gym.Wrapper):
+    def __init__(self, env):
+        gym.Wrapper.__init__(self, env)
+        self.env = env
+    
+    def reset(self):
+        obs = self.env.reset()
+        obs = obs['image'].transpose(2, 0, 1)
+        return obs
+
+    def step(self, action):
+        obs, rew, done, info = self.env.step(action)
+        obs = obs['image'].transpose(2, 0, 1)
+        return obs, rew, done, info
+
+
+# TODO Support this environment
+def get_minigrid(seed=None):
+    env = gym.make('MiniGrid-Empty-6x6-v0')
+
+    if seed:
+        env.seed(seed)
+
+    return MinigridWrapper(env)
