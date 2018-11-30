@@ -12,6 +12,7 @@ from replays import UniformReplayBuffer
 from networks import DQN
 
 
+
 # GPU or CPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -19,15 +20,17 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 NB_FRAMES = 10000
 BATCH_SIZE = 32
 DISCOUNT   = 0.99
+TARGET_UPDATE_STEPS = 100
 
 # Setup Environment
 env = gym.make('CartPole-v0')
 
 # Setup Agent
-model = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
-optimizer = optim.Adam(model.parameters())
+current_net = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
+target_net = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
+optimizer = optim.Adam(current_net.parameters())
 replay_buffer = UniformReplayBuffer(1000)
-agent = DQNAgent(env, model, replay_buffer, optimizer, discount=0.99)
+agent = DQNAgent(env, current_net, target_net, replay_buffer, optimizer, discount=0.99)
 
 # Setup Epsilon Decay
 # TODO Modularize
@@ -57,6 +60,9 @@ def train(nb_frames):
         if len(replay_buffer) > BATCH_SIZE:
             loss = agent.train(BATCH_SIZE)
             writer.add_scalar('data/losses', loss.item(), frame_idx)
+        
+        if (frame_idx + 1) % TARGET_UPDATE_STEPS == 0:
+            agent.update_target()
 
         writer.add_scalar('data/rewards', episode_reward, frame_idx)
 
