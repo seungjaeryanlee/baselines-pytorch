@@ -4,7 +4,7 @@ import random
 import numpy as np
 
 
-class UniformReplayBuffer(object):
+class UniformReplayBuffer:
     def __init__(self, capacity):
         self.buffer = deque(maxlen=capacity)
     
