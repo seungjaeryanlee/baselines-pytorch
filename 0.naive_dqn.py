@@ -35,6 +35,7 @@ epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_fi
 
 def train(nb_frames):
     episode_reward = 0
+    nb_episode = 0
     state = env.reset()
     writer = SummaryWriter(comment='-Naive')
     for frame_idx in range(1, nb_frames + 1):
@@ -47,16 +48,14 @@ def train(nb_frames):
         episode_reward += reward
 
         if done:
+            print('Frame {:5d}/{:5d} Reward {:3d} Loss {:2.4f}'.format(frame_idx + 1, nb_frames, int(episode_reward), loss))
+            writer.add_scalar('data/rewards', episode_reward, nb_episode)
             state = env.reset()
             episode_reward = 0
+            nb_episode += 1
 
         loss = agent.train(state, action, reward, next_state, done)
         writer.add_scalar('data/losses', loss.item(), frame_idx)
-
-        writer.add_scalar('data/rewards', episode_reward, frame_idx)
-
-        if (frame_idx + 1) % 100 == 0:
-            print('Frame {:5d}/{:5d} Reward {:3d} Loss {:2.4f}'.format(frame_idx + 1, nb_frames, int(episode_reward), loss))
 
     writer.close()
 

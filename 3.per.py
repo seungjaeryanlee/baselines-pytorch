@@ -46,6 +46,7 @@ beta_by_frame = lambda frame_idx: min(1.0, beta_start + frame_idx * (1.0 - beta_
 def train(nb_frames):
     episode_reward = 0
     nb_episode = 0
+    loss = 0
     state = env.reset()
     writer = SummaryWriter(comment='-PER')
     for frame_idx in range(1, nb_frames + 1):

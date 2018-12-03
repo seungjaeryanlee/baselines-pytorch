@@ -12,7 +12,6 @@ from replays import UniformReplayBuffer
 from networks import DQN
 
 
-
 # GPU or CPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -41,6 +40,8 @@ epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_fi
 
 def train(nb_frames):
     episode_reward = 0
+    nb_episode = 0
+    loss = 0 
     state = env.reset()
     writer = SummaryWriter(comment='-DQN')
     for frame_idx in range(1, nb_frames + 1):
@@ -54,8 +55,11 @@ def train(nb_frames):
         episode_reward += reward
 
         if done:
+            print('Frame {:5d}/{:5d} Reward {:3d} Loss {:2.4f}'.format(frame_idx + 1, nb_frames, int(episode_reward), loss))
+            writer.add_scalar('data/rewards', episode_reward, nb_episode)
             state = env.reset()
             episode_reward = 0
+            nb_episode += 1
 
         if len(replay_buffer) > BATCH_SIZE:
             loss = agent.train(BATCH_SIZE)
@@ -63,11 +67,6 @@ def train(nb_frames):
         
         if (frame_idx + 1) % TARGET_UPDATE_STEPS == 0:
             agent.update_target()
-
-        writer.add_scalar('data/rewards', episode_reward, frame_idx)
-
-        if (frame_idx + 1) % 100 == 0:
-            print('Frame {:5d}/{:5d} Reward {:3d} Loss {:2.4f}'.format(frame_idx + 1, nb_frames, int(episode_reward), loss))
 
     writer.close()
 
