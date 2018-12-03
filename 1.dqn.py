@@ -42,7 +42,7 @@ epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_fi
 def train(nb_frames):
     episode_reward = 0
     state = env.reset()
-    writer = SummaryWriter()
+    writer = SummaryWriter(comment='-DQN')
     for frame_idx in range(1, nb_frames + 1):
         epsilon = epsilon_by_frame(frame_idx)
         action = agent.act(state, epsilon)
