@@ -12,6 +12,7 @@ import torch.optim as optim
 from agents import DQNAgent
 from replays import UniformReplayBuffer
 from networks import DQN
+from wrappers import TorchWrapper
 
 
 # Parse Arguments
@@ -38,6 +39,7 @@ LEARNING_RATE = args.lr
 # Setup Environment
 env_id = 'CartPole-v0'
 env = gym.make(env_id)
+env = TorchWrapper(env)
 
 # Set Seed
 env.seed(SEED)
@@ -53,7 +55,7 @@ current_net = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
 target_net = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
 optimizer = optim.Adam(current_net.parameters(), lr=LEARNING_RATE)
 replay_buffer = UniformReplayBuffer(1000)
-agent = DQNAgent(env, current_net, target_net, replay_buffer, optimizer, discount=0.99)
+agent = DQNAgent(env, current_net, target_net, replay_buffer, optimizer, device, discount=0.99)
 
 # Setup Epsilon Decay
 # TODO Modularize
