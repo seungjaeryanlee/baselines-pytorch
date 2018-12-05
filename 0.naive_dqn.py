@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import argparse
 import gym
 import numpy as np
+import random
 from tensorboardX import SummaryWriter
 
 import torch
@@ -8,18 +10,41 @@ import torch.nn as nn
 import torch.optim as optim
 
 from agents import NaiveDQNAgent
+from replays import UniformReplayBuffer
 from networks import DQN
 
+
+# Parse Arguments
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('-s', '--seed', action='store', dest='seed', default=1, type=int)
+parser.add_argument('-n', '--frames', action='store', dest='nb_frames', default=10000, type=int)
+parser.add_argument('-b', '--batch', action='store', dest='batch_size', default=32, type=int)
+parser.add_argument('-d', '--discount', action='store', dest='discount', default=0.99, type=float)
+parser.add_argument('-u', '--update', action='store', dest='target_update_steps', default=100, type=int)
+args = parser.parse_args()
 
 # GPU or CPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Hyperparameters
-NB_FRAMES = 10000
-DISCOUNT   = 0.99
+SEED = args.seed
+NB_FRAMES = args.nb_frames
+BATCH_SIZE = args.batch_size
+DISCOUNT   = args.discount
+TARGET_UPDATE_STEPS = args.target_update_steps
 
 # Setup Environment
-env = gym.make('CartPole-v0')
+env_id = 'LunarLander-v2'
+env = gym.make(env_id)
+
+# Set Seed
+env.seed(SEED)
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed(SEED)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
 
 # Setup Agent
 model = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
@@ -36,20 +61,22 @@ epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_fi
 def train(nb_frames):
     episode_reward = 0
     nb_episode = 0
+    loss = 0
     state = env.reset()
-    writer = SummaryWriter(comment='-Naive')
+    writer = SummaryWriter('runs/{}/Naive/{}/{}/{}/{}/{}'.format(env_id, SEED, NB_FRAMES, BATCH_SIZE, DISCOUNT, TARGET_UPDATE_STEPS))
     for frame_idx in range(1, nb_frames + 1):
         epsilon = epsilon_by_frame(frame_idx)
         action = agent.act(state, epsilon)
 
         next_state, reward, done, _ = env.step(action)
+        writer.add_scalar('data/rewards', reward, frame_idx)
 
         state = next_state
         episode_reward += reward
 
         if done:
             print('Frame {:5d}/{:5d} Reward {:3d} Loss {:2.4f}'.format(frame_idx + 1, nb_frames, int(episode_reward), loss))
-            writer.add_scalar('data/rewards', episode_reward, nb_episode)
+            writer.add_scalar('data/episode_rewards', episode_reward, nb_episode)
             state = env.reset()
             episode_reward = 0
             nb_episode += 1
