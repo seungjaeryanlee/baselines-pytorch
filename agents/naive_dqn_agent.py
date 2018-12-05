@@ -3,15 +3,12 @@ import random
 import torch
 
 
-# GPU or CPU
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
 class NaiveDQNAgent:
-    def __init__(self, env, net, optimizer, discount):
+    def __init__(self, env, net, optimizer, device, discount):
         self.env = env
         self.net = net
         self.optimizer = optimizer
+        self.device = device
         self.discount = discount
 
     def act(self, state, epsilon):
@@ -20,12 +17,11 @@ class NaiveDQNAgent:
         possibility of random action for epsilon-greedy policy.
         """
         if random.random() > epsilon:
-            state = torch.FloatTensor(state).unsqueeze(0)
             with torch.no_grad():
                 q_value = self.net(state)
             action = q_value.max(1)[1].item()
         else:
-            action = random.randrange(self.env.action_space.n)
+            action = self.env.action_space.sample()
 
         return action
 
@@ -33,20 +29,21 @@ class NaiveDQNAgent:
         """
         Train the agent with one batch and return loss.
         """
-        state      = torch.FloatTensor([state]).to(device)
-        next_state = torch.FloatTensor([next_state]).unsqueeze(0).to(device)
-        action     = torch.LongTensor([action]).to(device)
-        reward     = torch.FloatTensor([reward]).to(device)
-        done       = torch.FloatTensor([done]).to(device)
+        state      = state.to(self.device)
+        next_state = next_state.unsqueeze(0).to(self.device)
+        action     = torch.LongTensor([action]).to(self.device)
+        reward     = reward.to(self.device)
+        done       = done.to(self.device)
 
-        q_values      = self.net(state)
-        next_q_values = self.net(next_state)
+        q_values = self.net(state)
+        q_value  = q_values.gather(1, action.unsqueeze(1)).squeeze(1)
 
-        q_value          = q_values.gather(1, action.unsqueeze(1)).squeeze(1)
-        next_q_value     = next_q_values.max(1)[0]
-        expected_q_value = reward + self.discount * next_q_value * (1 - done)
+        with torch.no_grad():
+            next_q_values    = self.net(next_state)
+            next_q_value     = next_q_values.max(1)[0]
+            expected_q_value = reward + self.discount * next_q_value * (1 - done)
 
-        loss = (q_value - expected_q_value.data).pow(2).mean()
+        loss = (q_value - expected_q_value.detach()).pow(2).mean()
 
         self.optimizer.zero_grad()
         loss.backward()
