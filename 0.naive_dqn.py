@@ -21,6 +21,7 @@ parser.add_argument('-n', '--frames', action='store', dest='nb_frames', default=
 parser.add_argument('-b', '--batch', action='store', dest='batch_size', default=32, type=int)
 parser.add_argument('-d', '--discount', action='store', dest='discount', default=0.99, type=float)
 parser.add_argument('-u', '--update', action='store', dest='target_update_steps', default=100, type=int)
+parser.add_argument('-l', '--lr', action='store', dest='lr', default=1e-3, type=int)
 args = parser.parse_args()
 
 # GPU or CPU
@@ -32,9 +33,10 @@ NB_FRAMES = args.nb_frames
 BATCH_SIZE = args.batch_size
 DISCOUNT   = args.discount
 TARGET_UPDATE_STEPS = args.target_update_steps
+LEARNING_RATE = args.lr
 
 # Setup Environment
-env_id = 'LunarLander-v2'
+env_id = 'CartPole-v0'
 env = gym.make(env_id)
 
 # Set Seed
@@ -48,7 +50,7 @@ torch.backends.cudnn.deterministic = True
 
 # Setup Agent
 model = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
-optimizer = optim.Adam(model.parameters())
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 agent = NaiveDQNAgent(env, model, optimizer, discount=0.99)
 
 # Setup Epsilon Decay
