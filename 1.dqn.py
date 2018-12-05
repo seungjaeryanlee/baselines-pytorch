@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from agents import DQNAgent
+from commons import set_seed
 from replays import UniformReplayBuffer
 from networks import DQN
 from wrappers import TorchWrapper
@@ -42,13 +43,7 @@ env = gym.make(env_id)
 env = TorchWrapper(env)
 
 # Set Seed
-env.seed(SEED)
-random.seed(SEED)
-np.random.seed(SEED)
-torch.manual_seed(SEED)
-torch.cuda.manual_seed(SEED)
-torch.backends.cudnn.benchmark = False
-torch.backends.cudnn.deterministic = True
+set_seed(env, SEED)
 
 # Setup Agent
 current_net = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
