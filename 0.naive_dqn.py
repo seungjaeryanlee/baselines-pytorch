@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from agents import NaiveDQNAgent
-from commons import set_seed
+from commons import set_seed, get_epsilon_decay
 from replays import UniformReplayBuffer
 from networks import DQN
 from wrappers import TorchWrapper
@@ -18,24 +18,16 @@ from wrappers import TorchWrapper
 
 # Parse Arguments
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('-s', '--seed', action='store', dest='seed', default=1, type=int)
-parser.add_argument('-n', '--frames', action='store', dest='nb_frames', default=10000, type=int)
-parser.add_argument('-b', '--batch', action='store', dest='batch_size', default=32, type=int)
-parser.add_argument('-d', '--discount', action='store', dest='discount', default=0.99, type=float)
-parser.add_argument('-u', '--update', action='store', dest='target_update_steps', default=100, type=int)
-parser.add_argument('-l', '--lr', action='store', dest='lr', default=1e-3, type=int)
+parser.add_argument('-s', '--seed', action='store', dest='SEED', default=1, type=int)
+parser.add_argument('-n', '--frames', action='store', dest='NB_FRAMES', default=10000, type=int)
+parser.add_argument('-b', '--batch', action='store', dest='BATCH_SIZE', default=32, type=int)
+parser.add_argument('-d', '--discount', action='store', dest='DISCOUNT', default=0.99, type=float)
+parser.add_argument('-u', '--update', action='store', dest='TARGET_UPDATE_STEPS', default=100, type=int)
+parser.add_argument('-l', '--lr', action='store', dest='LEARNING_RATE', default=1e-3, type=int)
 args = parser.parse_args()
 
 # GPU or CPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-# Hyperparameters
-SEED = args.seed
-NB_FRAMES = args.nb_frames
-BATCH_SIZE = args.batch_size
-DISCOUNT   = args.discount
-TARGET_UPDATE_STEPS = args.target_update_steps
-LEARNING_RATE = args.lr
 
 # Setup Environment
 env_id = 'CartPole-v0'
@@ -43,26 +35,25 @@ env = gym.make(env_id)
 env = TorchWrapper(env)
 
 # Set Seed
-set_seed(env, SEED)
+set_seed(env, args.SEED)
 
 # Setup Agent
 model = DQN(env.observation_space.shape[0], env.action_space.n).to(device)
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-agent = NaiveDQNAgent(env, model, optimizer, device, discount=0.99)
+optimizer = optim.Adam(model.parameters(), lr=args.LEARNING_RATE)
+agent = NaiveDQNAgent(env, model, optimizer, device, discount=args.DISCOUNT)
 
 # Setup Epsilon Decay
-# TODO Modularize
-epsilon_start = 1.0
-epsilon_final = 0.01
-epsilon_decay = 500
-epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * np.exp(-1. * frame_idx / epsilon_decay)
+EPSILON_START = 1.0
+EPSILON_FINAL = 0.01
+EPSILON_DECAY_STEPS = 500
+epsilon_by_frame = get_epsilon_decay(EPSILON_START, EPSILON_FINAL, EPSILON_DECAY_STEPS)
 
 def train(nb_frames):
     episode_reward = 0
     nb_episode = 0
     loss = 0
     state = env.reset()
-    writer = SummaryWriter('runs/{}/Naive/{}/{}/{}/{}/{}'.format(env_id, SEED, NB_FRAMES, BATCH_SIZE, DISCOUNT, TARGET_UPDATE_STEPS))
+    writer = SummaryWriter('runs/{}/Naive/{}/{}/{}/{}/{}'.format(env_id, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS))
     for frame_idx in range(1, nb_frames + 1):
         epsilon = epsilon_by_frame(frame_idx)
         action = agent.act(state, epsilon)
@@ -87,4 +78,4 @@ def train(nb_frames):
 
 
 if __name__ == '__main__':
-    train(NB_FRAMES)
+    train(args.NB_FRAMES)
