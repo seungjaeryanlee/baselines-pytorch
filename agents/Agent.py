@@ -125,3 +125,29 @@ class Agent:
             Render the environment. Defaults to True.
         """
         pass
+
+    def _compute_loss(batch):
+        """
+        Compute batch MSE loss between 1-step target Q and prediction Q.
+
+        TODO Implement
+
+        Parameters
+        ----------
+        batch : tuple of torch.Tensor
+            A tuple of batches: (state_batch, action_batch, reward_batch, next_state_batch, done_batch).
+
+        Returns
+        -------
+        loss : torch.FloatTensor
+            MSE loss of target Q and prediction Q that can be backpropagated. Has shape torch.Size([1]).
+        """
+        pass
+
+    def _update_target():
+        """
+        Update weights of Target DQN with weights of current DQN.
+
+        TODO Implement
+        """
+        pass
