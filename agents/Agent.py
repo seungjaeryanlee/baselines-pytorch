@@ -1,3 +1,6 @@
+import time
+
+
 class Agent:
     def __init__(self, env, args):
         """
@@ -19,7 +22,44 @@ class Agent:
             Number of frames to train the agent. If not specified, use
             `args.NB_FRAMES`.
         """
-        pass
+        nb_frames = nb_frames if nb_frames else self.args.NB_FRAMES
+
+        episode_reward = 0
+        episode_idx = 0
+        loss = 0
+        state = self.env.reset()
+        for frame_idx in range(1, nb_frames + 1):
+            # Interact and save to replay buffer
+            epsilon = epsilon_by_frame(frame_idx)
+            action = self.act(state, epsilon)
+            next_state, reward, done, _ = self.env.step(action)
+            self.writer.add_scalar('data/rewards', reward, frame_idx)
+            self.replay_buffer.push(state, action, reward, next_state, done)
+            state = next_state
+            episode_reward += reward
+
+            if done:
+                print('Frame {:5d}/{:5d}\tReturn {:3.2f}\tLoss {:2.4f}'.format(frame_idx + 1, nb_frames, episode_reward, loss))
+                self.writer.add_scalar('data/episode_rewards', episode_reward, episode_idx)
+                state = self.env.reset()
+                episode_reward = 0
+                episode_idx += 1
+
+            # Train DQN if the replay buffer is populated enough
+            if len(replay_buffer) > self.args.MIN_REPLAY_BUFFER_SIZE:
+                self.optimizer.zero_grad()
+                replay_batch = self.replay_buffer.sample(self.args.BATCH_SIZE)
+                loss = self._compute_loss(replay_batch)
+                loss.backward()
+                self.optimizer.step()
+
+                self.writer.add_scalar('data/losses', loss.item(), frame_idx)
+
+            # Update Target DQN periodically
+            if (frame_idx + 1) % self.args.TARGET_UPDATE_STEPS == 0:
+                self._update_target()
+
+        self.writer.close()
 
     def save(self):
         """
