@@ -24,4 +24,4 @@ agent.train()
 agent.save()
 
 # Test agent
-agent.test(render=False)
+agent.test(nb_episodes, render=False)
