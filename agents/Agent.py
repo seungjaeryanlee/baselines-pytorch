@@ -11,12 +11,13 @@ from replays import UniformReplayBuffer
 
 
 class Agent:
-    def __init__(self, env, args):
+    def __init__(self, env, device, args):
         """
         A Deep Q-Network (DQN) agent that can be trained with environments that
         have feature vectors as states and discrete values as actions.
         """
         self.env = env
+        self.device = device
         self.args = args
 
         self.writer = SummaryWriter('runs/{}/DQN/{}/{}/{}/{}/{}'.format(
