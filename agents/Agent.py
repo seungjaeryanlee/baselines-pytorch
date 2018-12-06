@@ -1,5 +1,7 @@
 import time
 
+from tensorboardX import SummaryWriter
+
 
 class Agent:
     def __init__(self, env, args):
@@ -7,8 +9,17 @@ class Agent:
         A Deep Q-Network (DQN) agent that can be trained with environments that
         have feature vectors as states and discrete values as actions.
         """
-        pass
-    
+        self.env = env
+        self.args = args
+
+        self.writer = SummaryWriter('runs/{}/Naive/{}/{}/{}/{}/{}'.format(
+            args.ENV_ID, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS))
+        # TODO Implement Epsilon Decay
+        self.get_epsilon_by_frame_idx = lambda frame_idx: 0.1
+        # TODO Implement
+        self.replay_buffer = None
+        self.optimizer = None
+
     def train(self, nb_frames=None):
         """
         Train the agent by interacting with the environment. The number of
@@ -30,7 +41,7 @@ class Agent:
         state = self.env.reset()
         for frame_idx in range(1, nb_frames + 1):
             # Interact and save to replay buffer
-            epsilon = epsilon_by_frame(frame_idx)
+            epsilon = self.get_epsilon_by_frame_idx(frame_idx)
             action = self.act(state, epsilon)
             next_state, reward, done, _ = self.env.step(action)
             self.writer.add_scalar('data/rewards', reward, frame_idx)
