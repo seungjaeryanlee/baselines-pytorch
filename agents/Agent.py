@@ -136,13 +136,16 @@ class Agent:
             Path inside `saves/` directory to save the parameters. Defaults
             to 'best/'.
         """
+        prefix = 'saves/{}/{}'.format(self.args.ENV_ID, PATH)
         if not os.path.exists('saves/'):
             os.makedirs('saves/')
-        if not os.path.exists('saves/' + PATH):
-            # TODO Check if dangerous?
-            os.makedirs('saves/' + PATH)
-        torch.save(self.current_net.state_dict(), 'saves/' + PATH + 'dqn.pth')
-        torch.save(self.optimizer.state_dict(), 'saves/' + PATH + 'optim.pth')
+        elif not os.path.exists('saves/{}'.format(self.args.ENV_ID)):
+            os.makedirs('saves/{}'.format(self.args.ENV_ID))
+        elif not os.path.exists('saves/{}/{}'.format(self.args.ENV_ID, PATH)):
+            os.makedirs('saves/{}/{}'.format(self.args.ENV_ID, PATH))
+
+        torch.save(self.current_net.state_dict(), prefix + 'dqn.pth')
+        torch.save(self.optimizer.state_dict(), prefix + 'optim.pth')
         print('[save] Successfully saved network and optimizer to '
               '{}. Note that save/ directory is ignored by git.'.format(PATH))
 
@@ -156,27 +159,22 @@ class Agent:
             Path inside `saves/` directory to load the parameters from.
             Defaults to 'best/'.
         """
+        prefix = 'saves/{}/{}'.format(self.args.ENV_ID, PATH)
         if not os.path.exists('saves/'):
-            print('[load] Save folder not found: not loading parameters.')
-        elif not os.path.exists('saves/' + PATH):
-            print('[load] Save subfolder not found: not loading parameters.')
-        elif (not os.path.exists('saves/' + PATH + 'dqn.pth') or
-              not os.path.isfile('saves/' + PATH + 'dqn.pth')):
-            print(
-                '[load] saves/'
-                '{}/dqn.pth not found: not loading parameters.'.format(PATH))
-        elif (not os.path.exists('saves/' + PATH + 'optim.pth') or
-              not os.path.isfile('saves/' + PATH + 'optim.pth')):
-            print(
-                '[load] saves/'
-                '{}/optim.pth not found: not loading parameters.'.format(PATH))
+            print('[load] Save folder not found.')
+        elif not os.path.exists('saves/{}'.format(self.args.ENV_ID)):
+            print('[load] Save subfolder not found.')
+        elif not os.path.exists('saves/{}/{}'.format(self.args.ENV_ID, PATH)):
+            print('[load] Save subfolder not found.')
+        elif (not os.path.exists(prefix + 'dqn.pth') or
+              not os.path.isfile(prefix + 'dqn.pth')):
+            print('[load] {}/dqn.pth not found.'.format(prefix))
+        elif (not os.path.exists(prefix + 'optim.pth') or
+              not os.path.isfile(prefix + 'optim.pth')):
+            print('[load] {}/optim.pth not found.'.format(prefix))
         else:
-            self.current_net.load_state_dict(torch.load(
-                'saves/' + PATH + 'dqn.pth'
-            ))
-            self.optimizer.load_state_dict(torch.load(
-                'saves/' + PATH + 'optim.pth'
-            ))
+            self.current_net.load_state_dict(torch.load(prefix + 'dqn.pth'))
+            self.optimizer.load_state_dict(torch.load(prefix + 'optim.pth'))
             print('[load] Successfully loaded parameters from savefile.')
 
     def test(self, nb_epsiodes=1, render=True):
