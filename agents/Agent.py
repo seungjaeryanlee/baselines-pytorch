@@ -75,6 +75,9 @@ class Agent:
         loss = torch.FloatTensor([0])
         state = self.env.reset()
         for frame_idx in range(1, nb_frames + 1):
+            # Start timer
+            t_start = time.time()
+
             # Interact and save to replay buffer
             epsilon = self.get_epsilon_by_frame_idx(frame_idx)
             action = self.act(state, epsilon)
@@ -106,6 +109,10 @@ class Agent:
             # Update Target DQN periodically
             if (frame_idx + 1) % self.args.TARGET_UPDATE_STEPS == 0:
                 self._update_target()
+
+            # End timer
+            t_end = time.time()
+            self.writer.add_scalar('data/time', t_end - t_start, frame_idx)
 
         self.writer.close()
 
