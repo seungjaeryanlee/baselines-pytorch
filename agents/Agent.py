@@ -138,12 +138,8 @@ class Agent:
             to 'best/'.
         """
         prefix = 'saves/{}/{}'.format(self.args.ENV_ID, PATH)
-        if not os.path.exists('saves/'):
-            os.makedirs('saves/')
-        elif not os.path.exists('saves/{}'.format(self.args.ENV_ID)):
-            os.makedirs('saves/{}'.format(self.args.ENV_ID))
-        elif not os.path.exists('saves/{}/{}'.format(self.args.ENV_ID, PATH)):
-            os.makedirs('saves/{}/{}'.format(self.args.ENV_ID, PATH))
+        if not os.path.exists(prefix):
+            os.makedirs(prefix)
 
         torch.save(self.current_net.state_dict(), prefix + 'dqn.pth')
         torch.save(self.optimizer.state_dict(), prefix + 'optim.pth')
@@ -200,7 +196,8 @@ class Agent:
                 episode_reward += reward.item()
                 if render:
                     self.env.render()
-            print('[test] Episode {}\tReturn {}'.format(episode_idx, episode_reward))
+            print('[test] Episode {}\tReturn {}'.format(
+                episode_idx, episode_reward))
 
     def _compute_loss(self, batch):
         """
