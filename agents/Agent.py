@@ -4,8 +4,7 @@ import time
 import torch
 import torch.optim as optim
 
-from tensorboardX import SummaryWriter
-
+from commons import get_writer
 from networks import DQN
 from replays import UniformReplayBuffer
 
@@ -20,8 +19,7 @@ class Agent:
         self.device = device
         self.args = args
 
-        self.writer = SummaryWriter('runs/{}/DQN/{}/{}/{}/{}/{}/{}/{}'.format(
-            args.ENV_ID, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS, args.LEARNING_RATE, args.REPLAY_BUFFER_SIZE, args.MIN_REPLAY_BUFFER_SIZE))
+        self.writer = get_writer('DQN', args)
         self.current_net = DQN(env.observation_space.shape[0], env.action_space.n)
         self.target_net = DQN(env.observation_space.shape[0], env.action_space.n)
         self.optimizer = optim.Adam(self.current_net.parameters(), lr=args.LEARNING_RATE)
