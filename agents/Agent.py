@@ -171,8 +171,12 @@ class Agent:
                 '[load] saves/'
                 '{}/optim.pth not found: not loading parameters.'.format(PATH))
         else:
-            self.current_net.load_state_dict('saves/' + PATH + 'dqn.pth')
-            self.optimizer.load_state_dict('saves/' + PATH + 'optim.pth')
+            self.current_net.load_state_dict(torch.load(
+                'saves/' + PATH + 'dqn.pth'
+            ))
+            self.optimizer.load_state_dict(torch.load(
+                'saves/' + PATH + 'optim.pth'
+            ))
             print('[load] Successfully loaded parameters from savefile.')
 
     def test(self, nb_epsiodes=1, render=True):
