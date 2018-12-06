@@ -1,11 +1,13 @@
 import gym
+from gym import spaces
+import numpy as np
 import torch
 
 
 class TorchWrapper(gym.Wrapper):
     """
     OpenAI Environment Wrapper that changes output types of `env.reset()` and
-    `env.step()` to `torch.tensor`.
+    `env.step()` to `torch.Tensor`.
     """
     def __init__(self, env):
         gym.Wrapper.__init__(self, env)
@@ -21,3 +23,21 @@ class TorchWrapper(gym.Wrapper):
         reward = torch.FloatTensor([reward])
         done = torch.FloatTensor([done])
         return ob, reward, done, info
+
+
+class AtariPermuteWrapper(gym.ObservationWrapper):
+    """
+    OpenAI Atari Environment Wrapper that changes output types of `env.reset()`
+    and `env.step()` to `torch.Tensor`.
+    """
+    def __init__(self, env):
+        gym.ObservationWrapper.__init__(self, env)
+        shp = env.observation_space.shape
+        self.observation_space = spaces.Box(
+            low=0,
+            high=1,
+            shape=(shp[2], shp[0], shp[1]),
+            dtype=np.float32)
+
+    def observation(self, observation):
+        return observation.permute(0, 3, 1, 2)

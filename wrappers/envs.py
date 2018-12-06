@@ -1,6 +1,7 @@
 import gym
 
-from .torch_wrappers import TorchWrapper
+from .atari_wrappers import make_atari, wrap_deepmind
+from .torch_wrappers import TorchWrapper, AtariPermuteWrapper
 
 
 def make_env(env_id):
@@ -22,7 +23,12 @@ def make_env(env_id):
     if env_id == 'CartPole-v0':
         env = gym.make(env_id)
         env = TorchWrapper(env)
+    elif env_id == 'PongNoFrameskip-v4':
+        env = make_atari(env_id)
+        env = wrap_deepmind(env, frame_stack=True)
+        env = TorchWrapper(env)
+        env = AtariPermuteWrapper(env)
     else:
-        ValueError('{} is not a supported environment id.'.format(env_id))
+        raise ValueError('{} is not a supported environment.'.format(env_id))
 
     return env
