@@ -16,25 +16,25 @@ class UniformReplayBuffer:
         """
         Add a new interaction / experience to the replay buffer.
 
-        TODO Implement
-
         Parameters
         ----------
-        state : list or np.array
+        state : torch.Tensor of torch.float32
+            Has shape (1, L) (for feature-type states) or (1, C, H, W) (for image-type states).
         action : int
-        reward : float
-        next_state : list or np.array
-        done : bool
+        reward : torch.Tensor of torch.float32
+            Has shape (1, 1)
+        next_state : torch.Tensor of torch.float32
+            Has shape (1, L) (for feature-type states) or (1, C, H, W) (for image-type states).
+        done : torch.Tensor of torch.float32
+            Has shape (1, 1)
         """
-        pass
+        self.buffer.append((state, torch.LongTensor([action]), reward, next_state, done))
 
     def sample(self, batch_size):
         """
         Sample a batch from the replay buffer.
 
         This function does not check if the buffer is bigger than the `batch_size`.
-
-        TODO Implement
 
         Parameters
         ----------
@@ -46,4 +46,5 @@ class UniformReplayBuffer:
         batch: tuple of torch.Tensor
             A tuple of batches: (state_batch, action_batch, reward_batch, next_state_batch, done_batch).
         """
-        pass
+        state, action, reward, next_state, done = zip(*random.sample(self.buffer, batch_size))
+        return torch.cat(state), torch.cat(action), torch.cat(reward), torch.cat(next_state), torch.cat(done)
