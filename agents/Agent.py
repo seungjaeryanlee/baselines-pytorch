@@ -147,7 +147,5 @@ class Agent:
     def _update_target():
         """
         Update weights of Target DQN with weights of current DQN.
-
-        TODO Implement
         """
-        pass
+        self.target_net.load_state_dict(self.current_net.state_dict())
