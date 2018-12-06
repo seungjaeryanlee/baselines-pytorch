@@ -2,6 +2,7 @@ import random
 import time
 
 import torch
+import torch.optim as optim
 
 from tensorboardX import SummaryWriter
 
@@ -22,11 +23,11 @@ class Agent:
             args.ENV_ID, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS))
         self.current_net = DQN(env.observation_space.shape[0], env.action_space.n)
         self.target_net = DQN(env.observation_space.shape[0], env.action_space.n)
+        self.optimizer = optim.Adam(self.current_net.parameters(), lr=args.LEARNING_RATE)
         self.replay_buffer = UniformReplayBuffer(args.REPLAY_BUFFER_SIZE)
+
         # TODO Implement Epsilon Decay
         self.get_epsilon_by_frame_idx = lambda frame_idx: 0.1
-        # TODO Implement
-        self.optimizer = None
 
     def act(self, state, epsilon):
         """
