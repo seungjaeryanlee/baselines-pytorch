@@ -45,4 +45,4 @@ agent.train()
 agent.save()
 
 # Test agent
-agent.test()
+agent.test(render=False)
