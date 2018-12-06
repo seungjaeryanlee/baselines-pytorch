@@ -127,11 +127,9 @@ class Agent:
         """
         pass
 
-    def _compute_loss(batch):
+    def _compute_loss(self, batch):
         """
         Compute batch MSE loss between 1-step target Q and prediction Q.
-
-        TODO Implement
 
         Parameters
         ----------
@@ -143,9 +141,40 @@ class Agent:
         loss : torch.FloatTensor
             MSE loss of target Q and prediction Q that can be backpropagated. Has shape torch.Size([1]).
         """
-        pass
+        state, action, reward, next_state, done = self.replay_buffer.sample(self.args.BATCH_SIZE)
 
-    def _update_target():
+        # TODO Send to device in self.replay.sample?
+        state      = state.to(self.device)
+        next_state = next_state.to(self.device)
+        action     = action.to(self.device)
+        reward     = reward.to(self.device)
+        done       = done.to(self.device)
+
+        # Predicted Q: Q_current(s, a)
+        # q_values : torch.Size([self.args.BATCH_SIZE, self.env.action_space.n])
+        # action   : torch.Size([self.args.BATCH_SIZE])
+        # q_value  : torch.Size([self.args.BATCH_SIZE])
+        q_values = self.current_net(state)
+        q_value  = q_values.gather(1, action.unsqueeze(1)).squeeze()
+
+        # Target Q: r + gamma * max_{a'} Q_target(s', a')
+        # next_q_values    : torch.Size([self.args.BATCH_SIZE, self.env.action_space.n])
+        # next_q_value     : torch.Size([self.args.BATCH_SIZE])
+        # expected_q_value : torch.Size([self.args.BATCH_SIZE])
+        with torch.no_grad():
+            # Q_target(s', a')
+            next_q_values = self.current_net(next_state)
+            next_q_value  = next_q_values.max(dim=1)[0].squeeze()
+            expected_q_value = reward + self.args.DISCOUNT * next_q_value * (1 - done)
+
+        assert expected_q_value.shape == q_value.shape
+
+        # Compute MSE Loss
+        loss = (q_value - expected_q_value.detach()).pow(2).mean()
+
+        return loss
+
+    def _update_target(self):
         """
         Update weights of Target DQN with weights of current DQN.
         """
