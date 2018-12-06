@@ -3,7 +3,7 @@ import gym
 
 def make_env(env_id):
     """
-    Return an OpenAI Gym environment wrapped with appropriate wrappers.
+    Return an OpenAI Gym environment wrapped with appropriate wrappers. Throws error if env_id is not recognized.
 
     Parameters
     ----------
@@ -16,4 +16,9 @@ def make_env(env_id):
         Wrapped OpenAI environment.
 
     """
-    pass
+    if env_id == 'CartPole-v0':
+        env = gym.make(env_id)
+    else:
+        ValueError('{} is not a supported environment id.'.format(env_id))
+
+    return env
