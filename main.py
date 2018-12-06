@@ -1,18 +1,19 @@
+#!/usr/bin/env python3
 import argparse
 
 from agents import Agent
-from commons import get_parser, set_seed, make_env
+from commons import get_args, set_seed
+from wrappers import make_env
 
 
 # Get hyperparameters from arguments
-parser = get_parser()
-args = parser.parse_args()
-
-# Set Seed
-set_seed(args.SEED)
+args = get_args()
 
 # Create wrapped environment
 env = make_env(args.ENV_ID)
+
+# Set Seed
+set_seed(env, args.SEED)
 
 # Create agent
 agent = Agent(env, args)
