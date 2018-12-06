@@ -5,6 +5,8 @@ import torch
 
 from tensorboardX import SummaryWriter
 
+from replays import UniformReplayBuffer
+
 
 class Agent:
     def __init__(self, env, args):
@@ -15,12 +17,12 @@ class Agent:
         self.env = env
         self.args = args
 
-        self.writer = SummaryWriter('runs/{}/Naive/{}/{}/{}/{}/{}'.format(
+        self.writer = SummaryWriter('runs/{}/DQN/{}/{}/{}/{}/{}'.format(
             args.ENV_ID, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS))
+        self.replay_buffer = UniformReplayBuffer(args.REPLAY_BUFFER_SIZE)
         # TODO Implement Epsilon Decay
         self.get_epsilon_by_frame_idx = lambda frame_idx: 0.1
         # TODO Implement
-        self.replay_buffer = None
         self.optimizer = None
         self.current_net = None
         self.target_net = None
@@ -88,7 +90,7 @@ class Agent:
                 episode_idx += 1
 
             # Train DQN if the replay buffer is populated enough
-            if len(replay_buffer) > self.args.MIN_REPLAY_BUFFER_SIZE:
+            if len(self.replay_buffer) > self.args.MIN_REPLAY_BUFFER_SIZE:
                 self.optimizer.zero_grad()
                 replay_batch = self.replay_buffer.sample(self.args.BATCH_SIZE)
                 loss = self._compute_loss(replay_batch)

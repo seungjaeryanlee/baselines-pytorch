@@ -24,7 +24,14 @@ def get_args(description=''):
     parser.add_argument('-b', '--batch', action='store', dest='BATCH_SIZE', default=32, type=int)
     parser.add_argument('-d', '--discount', action='store', dest='DISCOUNT', default=0.99, type=float)
     parser.add_argument('-u', '--update', action='store', dest='TARGET_UPDATE_STEPS', default=100, type=int)
-    parser.add_argument('-l', '--lr', action='store', dest='LEARNING_RATE', default=1e-3, type=int)
+    parser.add_argument('-l', '--lr', action='store', dest='LEARNING_RATE', default=1e-3, type=float)
+    parser.add_argument('--replay', action='store', dest='REPLAY_BUFFER_SIZE', default=1000, type=int)
+    parser.add_argument('--min-replay', action='store', dest='MIN_REPLAY_BUFFER_SIZE', default=32, type=int)
     args = parser.parse_args()
+
+    if args.REPLAY_BUFFER_SIZE < args.BATCH_SIZE:
+        raise ValueError('Replay buffer size is below batch size: sampling is impossible')
+    if args.REPLAY_BUFFER_SIZE < args.MIN_REPLAY_BUFFER_SIZE:
+        raise ValueError('Replay buffer size is below minimum replay buffer size: training is impossible')
 
     return args
