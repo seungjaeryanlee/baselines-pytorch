@@ -22,14 +22,14 @@ class Agent:
 
         if len(env.observation_space.shape) == 1:  # Feature-type observations
             self.current_net = DQN(
-                env.observation_space.shape[0], env.action_space.n)
+                env.observation_space.shape[0], env.action_space.n).to(device)
             self.target_net = DQN(
-                env.observation_space.shape[0], env.action_space.n)
+                env.observation_space.shape[0], env.action_space.n).to(device)
         elif len(env.observation_space.shape) == 3:  # Image-type observations
             self.current_net = AtariDQN(
-                env.observation_space.shape[0], env.action_space.n)
+                env.observation_space.shape[0], env.action_space.n).to(device)
             self.target_net = AtariDQN(
-                env.observation_space.shape[0], env.action_space.n)
+                env.observation_space.shape[0], env.action_space.n).to(device)
         else:
             raise ValueError('Unsupported observation type: '
                              'check environment observation space.')
@@ -44,6 +44,7 @@ class Agent:
     def act(self, state, epsilon):
         """
         Return an action sampled from an epsilon-greedy policy.
+
         Parameters
         ----------
         state
@@ -59,8 +60,8 @@ class Agent:
         """
         if random.random() > epsilon:
             with torch.no_grad():
-                q_value = self.current_net(state)
-            action = q_value.max(1)[1].item()
+                q_values = self.current_net(state.to(self.device))
+            action = q_values.max(1)[1].item()
         else:
             action = self.env.action_space.sample()
         return action
