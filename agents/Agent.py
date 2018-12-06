@@ -129,6 +129,12 @@ class Agent:
     def save(self, PATH='best/'):
         """
         Save the parameters of the agent's neural networks and optimizers.
+
+        Parameters
+        ----------
+        PATH : str
+            Path inside `saves/` directory to save the parameters. Defaults
+            to 'best/'.
         """
         if not os.path.exists('saves/'):
             os.makedirs('saves/')
@@ -139,6 +145,35 @@ class Agent:
         torch.save(self.optimizer.state_dict(), 'saves/' + PATH + 'optim.pth')
         print('[save] Successfully saved network and optimizer to '
               '{}. Note that save/ directory is ignored by git.'.format(PATH))
+
+    def load(self, PATH='best/'):
+        """
+        Load neural network and optimizer parameters from specified PATH.
+
+        Parameters
+        ----------
+        PATH : str
+            Path inside `saves/` directory to load the parameters from.
+            Defaults to 'best/'.
+        """
+        if not os.path.exists('saves/'):
+            print('[load] Save folder not found: not loading parameters.')
+        elif not os.path.exists('saves/' + PATH):
+            print('[load] Save subfolder not found: not loading parameters.')
+        elif (not os.path.exists('saves/' + PATH + 'dqn.pth') or
+              not os.path.isfile('saves/' + PATH + 'dqn.pth')):
+            print(
+                '[load] saves/'
+                '{}/dqn.pth not found: not loading parameters.'.format(PATH))
+        elif (not os.path.exists('saves/' + PATH + 'optim.pth') or
+              not os.path.isfile('saves/' + PATH + 'optim.pth')):
+            print(
+                '[load] saves/'
+                '{}/optim.pth not found: not loading parameters.'.format(PATH))
+        else:
+            self.current_net.load_state_dict('saves/' + PATH + 'dqn.pth')
+            self.optimizer.load_state_dict('saves/' + PATH + 'optim.pth')
+            print('[load] Successfully loaded parameters from savefile.')
 
     def test(self, nb_epsiodes=1, render=True):
         """
