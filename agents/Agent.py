@@ -1,4 +1,5 @@
 import random
+import os
 import time
 
 import torch
@@ -125,11 +126,19 @@ class Agent:
 
         self.writer.close()
 
-    def save(self):
+    def save(self, PATH='best/'):
         """
         Save the parameters of the agent's neural networks and optimizers.
         """
-        pass
+        if not os.path.exists('saves/'):
+            os.makedirs('saves/')
+        if not os.path.exists('saves/' + PATH):
+            # TODO Check if dangerous?
+            os.makedirs('saves/' + PATH)
+        torch.save(self.current_net.state_dict(), 'saves/' + PATH + 'dqn.pth')
+        torch.save(self.optimizer.state_dict(), 'saves/' + PATH + 'optim.pth')
+        print('[save] Successfully saved network and optimizer to '
+              '{}. Note that save/ directory is ignored by git.'.format(PATH))
 
     def test(self, nb_epsiodes=1, render=True):
         """

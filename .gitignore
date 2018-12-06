@@ -1,6 +1,8 @@
 # Custom
 # For TensorboardX
 runs/
+# For savefiles
+saves/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
