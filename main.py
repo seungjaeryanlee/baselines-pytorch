@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import argparse
-
 from agents import Agent
 from commons import get_args, set_seed
 from wrappers import make_env
