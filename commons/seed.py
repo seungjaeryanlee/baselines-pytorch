@@ -5,12 +5,14 @@ import torch
 
 def set_seed(env, seed):
     """
-    Make the execution deterministic by setting seed to all nondeterministic parts.
+    Make the execution deterministic by setting seed to all nondeterministic
+    parts.
 
     Parameters
     ----------
     env
-        The environment that the agent will interact with. Could be either deterministic or stochastic.
+        The environment that the agent will interact with. Could be either
+        deterministic or stochastic.
     seed : int
         The seed to set all random number generators.
     """

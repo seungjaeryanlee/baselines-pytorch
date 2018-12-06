@@ -10,7 +10,8 @@ def get_writer(name, args):
     name : str
         Name of the agent.
     args
-        Namespace that specifies environment, hyperparameters, and other information that determines the training.
+        Namespace that specifies environment, hyperparameters, and other
+        information that determines the training.
 
     Returns
     -------
