@@ -1,4 +1,7 @@
+import random
 import time
+
+import torch
 
 from tensorboardX import SummaryWriter
 
@@ -19,6 +22,34 @@ class Agent:
         # TODO Implement
         self.replay_buffer = None
         self.optimizer = None
+        self.current_net = None
+        self.target_net = None
+
+    def act(self, state, epsilon):
+        """
+        Return an action sampled from an epsilon-greedy policy.
+
+        TODO Implement
+
+        Parameters
+        ----------
+        state
+            The state to compute the epsilon-greedy action of.
+        epsilon : float
+            Epsilon in epsilon-greedy policy: probability of choosing a random action.
+
+        Returns
+        -------
+        action : int
+            An integer representing a discrete action chosen by the agent.
+        """
+        if random.random() > epsilon:
+            with torch.no_grad():
+                q_value = self.current_net(state)
+            action = q_value.max(1)[1].item()
+        else:
+            action = self.env.action_space.sample()
+        return action
 
     def train(self, nb_frames=None):
         """
