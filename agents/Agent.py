@@ -5,7 +5,7 @@ import torch
 import torch.optim as optim
 
 from commons import get_writer, get_epsilon_decay_function
-from networks import DQN
+from networks import DQN, AtariDQN
 from replays import UniformReplayBuffer
 
 
@@ -19,15 +19,24 @@ class Agent:
         self.device = device
         self.args = args
 
-        self.writer = get_writer('DQN', args)
-        self.current_net = DQN(
-            env.observation_space.shape[0], env.action_space.n)
-        self.target_net = DQN(
-            env.observation_space.shape[0], env.action_space.n)
+        if len(env.observation_space.shape) == 1:  # Feature-type observations
+            self.current_net = DQN(
+                env.observation_space.shape[0], env.action_space.n)
+            self.target_net = DQN(
+                env.observation_space.shape[0], env.action_space.n)
+        elif len(env.observation_space.shape) == 3:  # Image-type observations
+            self.current_net = AtariDQN(
+                env.observation_space.shape[0], env.action_space.n)
+            self.target_net = AtariDQN(
+                env.observation_space.shape[0], env.action_space.n)
+        else:
+            raise ValueError('Unsupported observation type: '
+                             'check environment observation space.')
         self.optimizer = optim.Adam(
             self.current_net.parameters(), lr=args.LEARNING_RATE)
         self.replay_buffer = UniformReplayBuffer(args.REPLAY_BUFFER_SIZE)
 
+        self.writer = get_writer('DQN', args)
         self.get_epsilon_by_frame_idx = get_epsilon_decay_function(
             args.EPSILON_START, args.EPSILON_END, args.EPSILON_DECAY_DURATION)
 
