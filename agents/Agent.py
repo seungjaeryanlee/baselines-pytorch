@@ -20,25 +20,27 @@ class Agent:
         self.args = args
 
         self.writer = get_writer('DQN', args)
-        self.current_net = DQN(env.observation_space.shape[0], env.action_space.n)
-        self.target_net = DQN(env.observation_space.shape[0], env.action_space.n)
-        self.optimizer = optim.Adam(self.current_net.parameters(), lr=args.LEARNING_RATE)
+        self.current_net = DQN(
+            env.observation_space.shape[0], env.action_space.n)
+        self.target_net = DQN(
+            env.observation_space.shape[0], env.action_space.n)
+        self.optimizer = optim.Adam(
+            self.current_net.parameters(), lr=args.LEARNING_RATE)
         self.replay_buffer = UniformReplayBuffer(args.REPLAY_BUFFER_SIZE)
 
-        self.get_epsilon_by_frame_idx = get_epsilon_decay_function(args.EPSILON_START, args.EPSILON_END, args.EPSILON_DECAY_DURATION)
+        self.get_epsilon_by_frame_idx = get_epsilon_decay_function(
+            args.EPSILON_START, args.EPSILON_END, args.EPSILON_DECAY_DURATION)
 
     def act(self, state, epsilon):
         """
         Return an action sampled from an epsilon-greedy policy.
-
-        TODO Implement
-
         Parameters
         ----------
         state
             The state to compute the epsilon-greedy action of.
         epsilon : float
-            Epsilon in epsilon-greedy policy: probability of choosing a random action.
+            Epsilon in epsilon-greedy policy: probability of choosing a random
+            action.
 
         Returns
         -------
@@ -83,8 +85,10 @@ class Agent:
             episode_reward += reward.item()
 
             if done:
-                print('Frame {:5d}/{:5d}\tReturn {:3.2f}\tLoss {:2.4f}'.format(frame_idx + 1, nb_frames, episode_reward, loss.item()))
-                self.writer.add_scalar('data/episode_rewards', episode_reward, episode_idx)
+                print('Frame {:5d}/{:5d}\tReturn {:3.2f}\tLoss {:2.4f}'.format(
+                    frame_idx + 1, nb_frames, episode_reward, loss.item()))
+                self.writer.add_scalar(
+                    'data/episode_rewards', episode_reward, episode_idx)
                 state = self.env.reset()
                 episode_reward = 0
                 episode_idx += 1
@@ -131,38 +135,42 @@ class Agent:
         Parameters
         ----------
         batch : tuple of torch.Tensor
-            A tuple of batches: (state_batch, action_batch, reward_batch, next_state_batch, done_batch).
+            A tuple of batches: (state_batch, action_batch, reward_batch,
+            next_state_batch, done_batch).
 
         Returns
         -------
         loss : torch.FloatTensor
-            MSE loss of target Q and prediction Q that can be backpropagated. Has shape torch.Size([1]).
+            MSE loss of target Q and prediction Q that can be backpropagated.
+            Has shape torch.Size([1]).
         """
-        state, action, reward, next_state, done = self.replay_buffer.sample(self.args.BATCH_SIZE)
+        state, action, reward, next_state, done = self.replay_buffer.sample(
+            self.args.BATCH_SIZE)
 
         # TODO Send to device in self.replay.sample?
-        state      = state.to(self.device)
+        state = state.to(self.device)
         next_state = next_state.to(self.device)
-        action     = action.to(self.device)
-        reward     = reward.to(self.device)
-        done       = done.to(self.device)
+        action = action.to(self.device)
+        reward = reward.to(self.device)
+        done = done.to(self.device)
 
         # Predicted Q: Q_current(s, a)
-        # q_values : torch.Size([self.args.BATCH_SIZE, self.env.action_space.n])
-        # action   : torch.Size([self.args.BATCH_SIZE])
-        # q_value  : torch.Size([self.args.BATCH_SIZE])
+        # q_values : torch.Size([BATCH_SIZE, self.env.action_space.n])
+        # action   : torch.Size([BATCH_SIZE])
+        # q_value  : torch.Size([BATCH_SIZE])
         q_values = self.current_net(state)
-        q_value  = q_values.gather(1, action.unsqueeze(1)).squeeze()
+        q_value = q_values.gather(1, action.unsqueeze(1)).squeeze()
 
         # Target Q: r + gamma * max_{a'} Q_target(s', a')
-        # next_q_values    : torch.Size([self.args.BATCH_SIZE, self.env.action_space.n])
-        # next_q_value     : torch.Size([self.args.BATCH_SIZE])
-        # expected_q_value : torch.Size([self.args.BATCH_SIZE])
+        # next_q_values    : torch.Size([BATCH_SIZE, self.env.action_space.n])
+        # next_q_value     : torch.Size([BATCH_SIZE])
+        # expected_q_value : torch.Size([BATCH_SIZE])
         with torch.no_grad():
             # Q_target(s', a')
             next_q_values = self.current_net(next_state)
-            next_q_value  = next_q_values.max(dim=1)[0].squeeze()
-            expected_q_value = reward + self.args.DISCOUNT * next_q_value * (1 - done)
+            next_q_value = next_q_values.max(dim=1)[0].squeeze()
+            expected_q_value = reward + \
+                self.args.DISCOUNT * next_q_value * (1 - done)
 
         assert expected_q_value.shape == q_value.shape
 
