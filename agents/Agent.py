@@ -20,8 +20,8 @@ class Agent:
         self.device = device
         self.args = args
 
-        self.writer = SummaryWriter('runs/{}/DQN/{}/{}/{}/{}/{}'.format(
-            args.ENV_ID, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS))
+        self.writer = SummaryWriter('runs/{}/DQN/{}/{}/{}/{}/{}/{}/{}'.format(
+            args.ENV_ID, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS, args.LEARNING_RATE, args.REPLAY_BUFFER_SIZE, args.MIN_REPLAY_BUFFER_SIZE))
         self.current_net = DQN(env.observation_space.shape[0], env.action_space.n)
         self.target_net = DQN(env.observation_space.shape[0], env.action_space.n)
         self.optimizer = optim.Adam(self.current_net.parameters(), lr=args.LEARNING_RATE)
