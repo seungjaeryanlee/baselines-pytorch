@@ -42,4 +42,4 @@ agent = Agent(env, device, args)
 agent.load()
 
 # Test agent
-agent.test()
+agent.test(render=False)

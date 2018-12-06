@@ -177,18 +177,29 @@ class Agent:
             self.optimizer.load_state_dict(torch.load(prefix + 'optim.pth'))
             print('[load] Successfully loaded parameters from savefile.')
 
-    def test(self, nb_epsiodes=1, render=True):
+    def test(self, nb_episodes=1, render=True):
         """
         Run the agent for `nb_epsiodes` with or without render.
 
         Parameters
         ----------
-        nb_epsiodes: int, optional
+        nb_episodes: int, optional
             Number of episodes to test the agent. Defaults to 1 episode.
         render: bool, optional
             Render the environment. Defaults to True.
         """
-        pass
+        for episode_idx in range(nb_episodes):
+            episode_reward = 0
+            state = self.env.reset()
+            done = False
+            while not done:
+                # Interact and save to replay buffer
+                action = self.act(state, epsilon=0)
+                state, reward, done, _ = self.env.step(action)
+                episode_reward += reward.item()
+                if render:
+                    self.env.render()
+            print('[test] Episode {}\tReturn {}'.format(episode_idx, episode_reward))
 
     def _compute_loss(self, batch):
         """
