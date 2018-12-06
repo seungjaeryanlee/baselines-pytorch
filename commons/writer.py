@@ -17,7 +17,7 @@ def get_writer(name, args):
     writer
         A tensorboardX SummaryWriter.
     """
-    writer = SummaryWriter('runs/{}/{}/{}/{}/{}/{}/{}/{}/{}'.format(
+    writer = SummaryWriter('runs/{}/{}/{}/{}/{}/{}/{}/{}/{}/{}/{}/{}'.format(
         args.ENV_ID,
         name,
         args.SEED,
@@ -27,6 +27,10 @@ def get_writer(name, args):
         args.TARGET_UPDATE_STEPS,
         args.LEARNING_RATE,
         args.REPLAY_BUFFER_SIZE,
-        args.MIN_REPLAY_BUFFER_SIZE))
+        args.MIN_REPLAY_BUFFER_SIZE,
+        args.EPSILON_START,
+        args.EPSILON_END,
+        args.EPSILON_DECAY_DURATION,
+    ))
 
     return writer

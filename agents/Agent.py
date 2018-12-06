@@ -4,7 +4,7 @@ import time
 import torch
 import torch.optim as optim
 
-from commons import get_writer
+from commons import get_writer, get_epsilon_decay_function
 from networks import DQN
 from replays import UniformReplayBuffer
 
@@ -25,8 +25,7 @@ class Agent:
         self.optimizer = optim.Adam(self.current_net.parameters(), lr=args.LEARNING_RATE)
         self.replay_buffer = UniformReplayBuffer(args.REPLAY_BUFFER_SIZE)
 
-        # TODO Implement Epsilon Decay
-        self.get_epsilon_by_frame_idx = lambda frame_idx: 0.1
+        self.get_epsilon_by_frame_idx = get_epsilon_decay_function(args.EPSILON_START, args.EPSILON_END, args.EPSILON_DECAY_DURATION)
 
     def act(self, state, epsilon):
         """

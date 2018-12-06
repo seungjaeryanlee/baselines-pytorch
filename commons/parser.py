@@ -27,6 +27,9 @@ def get_args(description=''):
     parser.add_argument('-l', '--lr', action='store', dest='LEARNING_RATE', default=1e-3, type=float)
     parser.add_argument('--replay', action='store', dest='REPLAY_BUFFER_SIZE', default=1000, type=int)
     parser.add_argument('--min-replay', action='store', dest='MIN_REPLAY_BUFFER_SIZE', default=32, type=int)
+    parser.add_argument('--epsilon-start', action='store', dest='EPSILON_START', default=1, type=float)
+    parser.add_argument('--epsilon-end', action='store', dest='EPSILON_END', default=0.1, type=float)
+    parser.add_argument('--epsilon-decay-duration', action='store', dest='EPSILON_DECAY_DURATION', default=5000, type=int)
     args = parser.parse_args()
 
     if args.REPLAY_BUFFER_SIZE < args.BATCH_SIZE:
