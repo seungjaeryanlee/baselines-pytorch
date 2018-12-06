@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import argparse
+import random
+import time
+
 import gym
 import numpy as np
-import random
 from tensorboardX import SummaryWriter
 
 import torch
@@ -55,6 +57,7 @@ def train(nb_frames):
     state = env.reset()
     writer = SummaryWriter('runs/{}/Naive/{}/{}/{}/{}/{}'.format(env_id, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS))
     for frame_idx in range(1, nb_frames + 1):
+        time_start = time.time()
         epsilon = epsilon_by_frame(frame_idx)
         action = agent.act(state, epsilon)
 
@@ -73,6 +76,9 @@ def train(nb_frames):
 
         loss = agent.train(state, action, reward, next_state, done)
         writer.add_scalar('data/losses', loss.item(), frame_idx)
+
+        time_end = time.time()
+        writer.add_scalar('data/time', time_end - time_start, frame_idx)
 
     writer.close()
 
