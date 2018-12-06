@@ -1,10 +1,16 @@
 # Baselines
 
-High-quality PyTorch 0.4.1 implementations of widely used Deep RL algorithms.
+High-quality modular PyTorch 0.4.1 implementations of widely used Deep RL algorithms.
+
+## Documentations
+
+ - To install necessary packages, check [INSTALLATION.md](docs/INSTALLATION.md).
+ - To learn how to use `baselines`, check [USAGE.md](docs/USAGE.md).
+ - For a contributor guide, check [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ## Algorithms
 
-- [x] "Naive" DQN
+- [ ] "Naive" DQN
 - [x] Vanilla DQN
 - [ ] Double DQN
 - [ ] Prioritized Experience Replay
@@ -16,6 +22,5 @@ High-quality PyTorch 0.4.1 implementations of widely used Deep RL algorithms.
 ## Compatible Environments
 
 - [x] CartPole (through OpenAI Gym)
-- [ ] Arcade Learning Environment (through OpenAI Gym)
+- [x] Arcade Learning Environment (through OpenAI Gym)
 - [ ] Super Mario Bros (through Gym Retro)
- 
