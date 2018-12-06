@@ -5,6 +5,7 @@ import torch
 
 from tensorboardX import SummaryWriter
 
+from networks import DQN
 from replays import UniformReplayBuffer
 
 
@@ -19,13 +20,13 @@ class Agent:
 
         self.writer = SummaryWriter('runs/{}/DQN/{}/{}/{}/{}/{}'.format(
             args.ENV_ID, args.SEED, args.NB_FRAMES, args.BATCH_SIZE, args.DISCOUNT, args.TARGET_UPDATE_STEPS))
+        self.current_net = DQN(env.observation_space.shape[0], env.action_space.n)
+        self.target_net = DQN(env.observation_space.shape[0], env.action_space.n)
         self.replay_buffer = UniformReplayBuffer(args.REPLAY_BUFFER_SIZE)
         # TODO Implement Epsilon Decay
         self.get_epsilon_by_frame_idx = lambda frame_idx: 0.1
         # TODO Implement
         self.optimizer = None
-        self.current_net = None
-        self.target_net = None
 
     def act(self, state, epsilon):
         """
@@ -70,20 +71,20 @@ class Agent:
 
         episode_reward = 0
         episode_idx = 0
-        loss = 0
+        loss = torch.FloatTensor([0])
         state = self.env.reset()
         for frame_idx in range(1, nb_frames + 1):
             # Interact and save to replay buffer
             epsilon = self.get_epsilon_by_frame_idx(frame_idx)
             action = self.act(state, epsilon)
             next_state, reward, done, _ = self.env.step(action)
-            self.writer.add_scalar('data/rewards', reward, frame_idx)
+            self.writer.add_scalar('data/rewards', reward.item(), frame_idx)
             self.replay_buffer.push(state, action, reward, next_state, done)
             state = next_state
-            episode_reward += reward
+            episode_reward += reward.item()
 
             if done:
-                print('Frame {:5d}/{:5d}\tReturn {:3.2f}\tLoss {:2.4f}'.format(frame_idx + 1, nb_frames, episode_reward, loss))
+                print('Frame {:5d}/{:5d}\tReturn {:3.2f}\tLoss {:2.4f}'.format(frame_idx + 1, nb_frames, episode_reward, loss.item()))
                 self.writer.add_scalar('data/episode_rewards', episode_reward, episode_idx)
                 state = self.env.reset()
                 episode_reward = 0
