@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import torch
 
 from agents import Agent
-from commons import get_args, set_seed
+from commons import set_seed
 from wrappers import make_env
 
 
