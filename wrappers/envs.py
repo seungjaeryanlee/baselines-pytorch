@@ -5,7 +5,8 @@ from .torch_wrappers import TorchWrapper
 
 def make_env(env_id):
     """
-    Return an OpenAI Gym environment wrapped with appropriate wrappers. Throws error if env_id is not recognized.
+    Return an OpenAI Gym environment wrapped with appropriate wrappers. Throws
+    error if env_id is not recognized.
 
     Parameters
     ----------

@@ -1,5 +1,3 @@
-import gym
-import numpy as np
 import torch
 
 from .uniform import UniformReplayBuffer
@@ -10,7 +8,6 @@ def test_uniform_batch_type():
     Test if `replay_buffer.sample()` returns five `torch.Tensor` objects.
     """
     BATCH_SIZE = 1
-    STATE_LEN = 4
     replay_buffer = UniformReplayBuffer(BATCH_SIZE)
 
     for i in range(BATCH_SIZE):
@@ -21,22 +18,24 @@ def test_uniform_batch_type():
         done = torch.FloatTensor([0])
         replay_buffer.push(state, action, reward, next_state, done)
 
-    state_batch, action_batch, reward_batch, next_state_batch, done_batch = replay_buffer.sample(1)
+    state_b, action_b, reward_b, next_state_b, done_b = replay_buffer.sample(1)
 
-    print('S  : ', state_batch)
-    print('A  : ', action_batch)
-    print('R  : ', reward_batch)
-    print('S\' : ', next_state_batch)
-    print('D  : ' , done_batch)
-    assert type(state_batch) == torch.Tensor
-    assert type(action_batch) == torch.Tensor
-    assert type(reward_batch) == torch.Tensor
-    assert type(next_state_batch) == torch.Tensor
-    assert type(done_batch) == torch.Tensor
+    print('S  : ', state_b)
+    print('A  : ', action_b)
+    print('R  : ', reward_b)
+    print('S\' : ', next_state_b)
+    print('D  : ', done_b)
+    assert type(state_b) == torch.Tensor
+    assert type(action_b) == torch.Tensor
+    assert type(reward_b) == torch.Tensor
+    assert type(next_state_b) == torch.Tensor
+    assert type(done_b) == torch.Tensor
+
 
 def test_uniform_batch_shape():
     """
-    Test if `replay_buffer.sample()` returns five `torch.Tensor` objects with correct shapes.
+    Test if `replay_buffer.sample()` returns five `torch.Tensor` objects with
+    correct shapes.
     """
     BATCH_SIZE = 2
     STATE_LEN = 4
@@ -50,15 +49,16 @@ def test_uniform_batch_shape():
         done = torch.FloatTensor([0])
         replay_buffer.push(state, action, reward, next_state, done)
 
-    state_batch, action_batch, reward_batch, next_state_batch, done_batch = replay_buffer.sample(BATCH_SIZE)
+    state_b, action_b, reward_b, next_state_b, done_b = replay_buffer.sample(
+        BATCH_SIZE)
 
-    print('S  : ', state_batch)
-    print('A  : ', action_batch)
-    print('R  : ', reward_batch)
-    print('S\' : ', next_state_batch)
-    print('D  : ' , done_batch)
-    assert state_batch.shape == torch.Size([BATCH_SIZE, STATE_LEN])
-    assert action_batch.shape == torch.Size([BATCH_SIZE])
-    assert reward_batch.shape == torch.Size([BATCH_SIZE])
-    assert next_state_batch.shape == torch.Size([BATCH_SIZE, STATE_LEN])
-    assert done_batch.shape == torch.Size([BATCH_SIZE])
+    print('S  : ', state_b)
+    print('A  : ', action_b)
+    print('R  : ', reward_b)
+    print('S\' : ', next_state_b)
+    print('D  : ', done_b)
+    assert state_b.shape == torch.Size([BATCH_SIZE, STATE_LEN])
+    assert action_b.shape == torch.Size([BATCH_SIZE])
+    assert reward_b.shape == torch.Size([BATCH_SIZE])
+    assert next_state_b.shape == torch.Size([BATCH_SIZE, STATE_LEN])
+    assert done_b.shape == torch.Size([BATCH_SIZE])
