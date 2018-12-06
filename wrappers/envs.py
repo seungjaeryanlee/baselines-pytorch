@@ -1,5 +1,7 @@
 import gym
 
+from .torch_wrappers import TorchWrapper
+
 
 def make_env(env_id):
     """
@@ -18,6 +20,7 @@ def make_env(env_id):
     """
     if env_id == 'CartPole-v0':
         env = gym.make(env_id)
+        env = TorchWrapper(env)
     else:
         ValueError('{} is not a supported environment id.'.format(env_id))
 
