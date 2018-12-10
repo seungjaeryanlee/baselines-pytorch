@@ -13,6 +13,15 @@ git clone https://github.com/seungjaeryanlee/baselines.git
 cd baselines
 ```
 
+## 2. Install Linux Packages
+
+We use OpenCV, which requires some additional library. Install them with the following `apt` command:
+
+```
+sudo apt-get update
+sudo apt-get install libsm6 libxrender-dev
+```
+
 ## 2. Install Python Packages
 
 Then, install necessary Python packages using the provided `requirements.txt`.
