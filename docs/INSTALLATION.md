@@ -22,7 +22,7 @@ sudo apt-get update
 sudo apt-get install libsm6 libxrender-dev
 ```
 
-## 2. Install Python Packages
+## 3. Install Python Packages
 
 Then, install necessary Python packages using the provided `requirements.txt`.
 
@@ -30,7 +30,7 @@ Then, install necessary Python packages using the provided `requirements.txt`.
 pip install -r requirements.txt
 ```
 
-## 3. Test Installation
+## 4. Test Installation
 
 To verify that `baselines` has been installed correctly, try running `main.py`.
 
