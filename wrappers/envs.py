@@ -21,7 +21,7 @@ def make_env(env_id):
         Wrapped OpenAI environment.
 
     """
-    if env_id in ['CartPole-v0', 'LunarLander-v2']:
+    if env_id in ['CartPole-v0', 'LunarLander-v2', 'Acrobot-v1']:
         env = gym.make(env_id)
         env = TorchWrapper(env)
     elif env_id == 'PongNoFrameskip-v4':
