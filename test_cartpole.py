@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-from types import SimpleNamespace
-
 import torch
 
 from agents import Agent
-from commons import set_seed
+from commons import get_args, set_seed
 from wrappers import make_env
 
 
@@ -23,8 +21,8 @@ args_dict = {
     'EPSILON_END': 0.1,
     'EPSILON_DECAY_DURATION': 5000,
 }
-args = SimpleNamespace(**args_dict)
-
+# Allow changing hyperparameters from command-line arguments
+args = get_args(default_args=args_dict)
 
 # Create wrapped environment
 env = make_env(args.ENV_ID)
