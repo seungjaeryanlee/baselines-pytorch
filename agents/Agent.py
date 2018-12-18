@@ -97,7 +97,7 @@ class Agent:
             epsilon = self.get_epsilon_by_frame_idx(frame_idx)
             action = self.act(state, epsilon)
             next_state, reward, done, _ = self.env.step(action)
-            wandb.log({'Reward': reward.item()})
+            wandb.log({'Reward': reward.item()}, step=frame_idx+1)
             self.replay_buffer.push(state, action, reward, next_state, done)
             state = next_state
             episode_reward += reward.item()
@@ -105,7 +105,7 @@ class Agent:
             if done:
                 print('Frame {:5d}/{:5d}\tReturn {:3.2f}\tLoss {:2.4f}'.format(
                     frame_idx + 1, nb_frames, episode_reward, loss.item()))
-                wandb.log({'Episode Rewards': episode_reward})
+                wandb.log({'Episode Rewards': episode_reward}, step=frame_idx+1)
                 state = self.env.reset()
                 episode_reward = 0
 
@@ -117,7 +117,7 @@ class Agent:
                 loss.backward()
                 self.optimizer.step()
 
-                wandb.log({'Loss': loss.item()})
+                wandb.log({'Loss': loss.item()}, step=frame_idx+1)
 
             # Update Target DQN periodically
             if (frame_idx + 1) % self.args.TARGET_UPDATE_STEPS == 0:
@@ -125,7 +125,7 @@ class Agent:
 
             # End timer
             t_end = time.time()
-            wandb.log({'Time': t_end - t_start})
+            wandb.log({'Time': t_end - t_start}, step=frame_idx+1)
 
     def save(self, PATH='best/'):
         """
