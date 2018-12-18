@@ -95,6 +95,7 @@ class Agent:
 
             # Interact and save to replay buffer
             epsilon = self.get_epsilon_by_frame_idx(frame_idx)
+            wandb.log({'Epsilon': epsilon}, step=frame_idx+1)
             action = self.act(state, epsilon)
             next_state, reward, done, _ = self.env.step(action)
             wandb.log({'Reward': reward.item()}, step=frame_idx+1)
@@ -125,7 +126,10 @@ class Agent:
 
             # End timer
             t_end = time.time()
-            wandb.log({'Time': t_end - t_start}, step=frame_idx+1)
+            wandb.log({
+                'Time': t_end - t_start,
+                'FPS': 1 / (t_end - t_start),
+            }, step=frame_idx+1)
 
     def save(self, PATH='best/'):
         """
