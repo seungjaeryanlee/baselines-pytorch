@@ -5,7 +5,9 @@ import time
 import torch
 import torch.optim as optim
 
-from commons import get_writer, get_epsilon_decay_function
+import wandb
+
+from commons import get_epsilon_decay_function
 from networks import DQN, AtariDQN
 from replays import UniformReplayBuffer
 
@@ -37,7 +39,10 @@ class Agent:
             self.current_net.parameters(), lr=args.LEARNING_RATE)
         self.replay_buffer = UniformReplayBuffer(args.REPLAY_BUFFER_SIZE)
 
-        self.writer = get_writer('DQN', args)
+        wandb.init(project='baselines')
+        wandb.config.update(self.args)
+        wandb.watch(self.current_net, log='all')
+
         self.get_epsilon_by_frame_idx = get_epsilon_decay_function(
             args.EPSILON_START, args.EPSILON_END, args.EPSILON_DECAY_DURATION)
 
@@ -82,7 +87,6 @@ class Agent:
         nb_frames = nb_frames if nb_frames else self.args.NB_FRAMES
 
         episode_reward = 0
-        episode_idx = 0
         loss = torch.FloatTensor([0])
         state = self.env.reset()
         for frame_idx in range(1, nb_frames + 1):
@@ -93,7 +97,7 @@ class Agent:
             epsilon = self.get_epsilon_by_frame_idx(frame_idx)
             action = self.act(state, epsilon)
             next_state, reward, done, _ = self.env.step(action)
-            self.writer.add_scalar('data/rewards', reward.item(), frame_idx)
+            wandb.log({'Reward': reward.item()})
             self.replay_buffer.push(state, action, reward, next_state, done)
             state = next_state
             episode_reward += reward.item()
@@ -101,11 +105,9 @@ class Agent:
             if done:
                 print('Frame {:5d}/{:5d}\tReturn {:3.2f}\tLoss {:2.4f}'.format(
                     frame_idx + 1, nb_frames, episode_reward, loss.item()))
-                self.writer.add_scalar(
-                    'data/episode_rewards', episode_reward, episode_idx)
+                wandb.log({'Episode Rewards': episode_reward})
                 state = self.env.reset()
                 episode_reward = 0
-                episode_idx += 1
 
             # Train DQN if the replay buffer is populated enough
             if len(self.replay_buffer) > self.args.MIN_REPLAY_BUFFER_SIZE:
@@ -115,7 +117,7 @@ class Agent:
                 loss.backward()
                 self.optimizer.step()
 
-                self.writer.add_scalar('data/losses', loss.item(), frame_idx)
+                wandb.log({'Loss': loss.item()})
 
             # Update Target DQN periodically
             if (frame_idx + 1) % self.args.TARGET_UPDATE_STEPS == 0:
@@ -123,9 +125,7 @@ class Agent:
 
             # End timer
             t_end = time.time()
-            self.writer.add_scalar('data/time', t_end - t_start, frame_idx)
-
-        self.writer.close()
+            wandb.log({'Time': t_end - t_start})
 
     def save(self, PATH='best/'):
         """

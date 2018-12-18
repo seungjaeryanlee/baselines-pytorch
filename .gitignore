@@ -1,6 +1,6 @@
 # Custom
-# For TensorboardX
-runs/
+# For wandb
+wandb/
 # For savefiles
 saves/
 
