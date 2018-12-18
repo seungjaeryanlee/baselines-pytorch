@@ -1,5 +1,7 @@
 # Baselines
 
+[![Build Status](https://travis-ci.com/seungjaeryanlee/baselines.svg?branch=master)](https://travis-ci.com/seungjaeryanlee/baselines)
+
 High-quality modular PyTorch 0.4.1 implementations of widely used Deep RL algorithms.
 
 ## Documentations
