@@ -40,6 +40,17 @@ def make_env(env_id):
         env = ScaledFloatFrame(env)
         env = TorchWrapper(env)
         env = AtariPermuteWrapper(env)
+    elif env_id == 'SuperMarioBros-v1':
+        from nes_py.wrappers import BinarySpaceToDiscreteSpaceEnv
+        import gym_super_mario_bros
+        from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
+
+        env = gym_super_mario_bros.make('SuperMarioBros-v1')
+        env = BinarySpaceToDiscreteSpaceEnv(env, SIMPLE_MOVEMENT)
+        env = WarpFrame(env)
+        env = ScaledFloatFrame(env)
+        env = TorchWrapper(env)
+        env = AtariPermuteWrapper(env)
     else:
         raise ValueError('{} is not a supported environment.'.format(env_id))
 
