@@ -19,7 +19,7 @@ jedi==0.13.2
 jupyter-client==5.2.4
 jupyter-core==4.4.0
 mccabe==0.6.1
-numpy==1.15.4
+numpy==1.21.0
 nvidia-ml-py3==7.352.0
 opencv-python==4.2.0.32
 parso==0.3.1
