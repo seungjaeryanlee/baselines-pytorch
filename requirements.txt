@@ -13,7 +13,7 @@ graphql-core==2.1
 gym==0.10.9
 idna==2.8
 ipykernel==5.1.0
-ipython==7.16.3
+ipython==8.10.0
 ipython-genutils==0.2.0
 jedi==0.13.2
 jupyter-client==5.2.4
